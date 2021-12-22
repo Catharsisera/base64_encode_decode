@@ -1,60 +1,57 @@
 BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
 
-def encode(alphabet, sequenceBytes):
+class Base64(object):
 
-    def Symb(x, op=8):
-        t = ''
-        if len(x) % op != 0:
-            for i in range(op - len(x) % op):
-                t = t + '0'
-        return t + x
+    def __init__(self):
+        pass
 
-    bitsCount = 6 # Число бит на символ в алгоритме
-    TextBits = "".join([Symb(bin(i)[2:]) for i in sequenceBytes])
-    # print(TextBits)
-    sizeText = len(TextBits)
-    # print(sizeText)
+    def encode(alphabet, sequenceBytes):
+        def Symb(x, op=8):
+            t = ''
+            if len(x) % op != 0:
+                for i in range(op - len(x) % op):
+                    t = t + '0'
+            return t + x
 
-    while ((sizeText) % bitsCount) != 0:
-        TextBits += '00000000'
-        sizeText += 8
+        bitsCount = 6 # Число бит на символ в алгоритме
+        TextBits = "".join([Symb(bin(i)[2:]) for i in sequenceBytes])
+        sizeText = len(TextBits)
 
-    TextBits = list(map(int, [i for i in TextBits]))
-    # print(TextBits, '\b')
-    TextBits = [TextBits[i] * 2 ** (bitsCount - i % bitsCount - 1) for i in range(len(TextBits))] #перевод из 2 в 10 (1)
-    # print(TextBits, '\b')
-    TextBits = [sum(TextBits[i * bitsCount:i * bitsCount + bitsCount]) for i in range(len(TextBits) // bitsCount)] #(2)
-    # print(TextBits, '\b')
-    zeroBytes = 1  # Флаг работы с добавленными нулевыми битами
-    lastPos = -1
-    countBytes = []
-    finalSequence = []
+        while ((sizeText) % bitsCount) != 0:
+            TextBits += '00000000'
+            sizeText += 8
 
-    while zeroBytes:
-        if (TextBits[lastPos - 1] != 0) and (TextBits[lastPos] == 0):
-            zeroBytes = 0
-        else:
-            TextBits.pop()
-            countBytes.append("=")
+        TextBits = list(map(int, [i for i in TextBits]))
+        TextBits = [TextBits[i] * 2 ** (bitsCount - i % bitsCount - 1) for i in range(len(TextBits))] #перевод из 2 в 10 (1)
+        TextBits = [sum(TextBits[i * bitsCount:i * bitsCount + bitsCount]) for i in range(len(TextBits) // bitsCount)] #(2)
 
-    finalSequence = [alphabet[i] for i in TextBits]
-    finalSequence.extend(countBytes)
-    finalSequence = "".join(finalSequence)
-    return finalSequence
+        zeroBytes = 1  # Флаг работы с добавленными нулевыми битами
+        lastPos = -1
+        countBytes = []
+        finalSequence = []
 
-def decode(alphabet, sequenceBytes, code='UTF-8'):
+        while zeroBytes:
+            if (TextBits[lastPos - 1] != 0) and (TextBits[lastPos] == 0):
+                zeroBytes = 0
+            else:
+                TextBits.pop()
+                countBytes.append("=")
 
-    bitsCount = 6
-    TextBits = ["".join(['0' for k in range(bitsCount - len(bin(alphabet.index(i))[2:]))]) + bin(alphabet.index(i))[2:]
-                if i != '=' else "".join(['0' for l in range(bitsCount)]) for i in sequenceBytes]
-    TextBits = "".join(TextBits)
-    sizeText = len(TextBits)
+        finalSequence = [alphabet[i] for i in TextBits]
+        finalSequence.extend(countBytes)
+        finalSequence = "".join(finalSequence)
+        return finalSequence
 
-    while '00000000' in TextBits[sizeText - 8:sizeText]:
-        TextBits = TextBits[:sizeText - 8]
-        sizeText -= 8
+    def decode(alphabet, sequenceBytes, code='UTF-8'):
+        bitsCount = 6
+        TextBits = ["".join(['0' for k in range(bitsCount - len(bin(alphabet.index(i))[2:]))]) + bin(alphabet.index(i))[2:]
+                    if i != '=' else "".join(['0' for l in range(bitsCount)]) for i in sequenceBytes]
+        TextBits = "".join(TextBits)
+        sizeText = len(TextBits)
 
-    finalSequence = [int('0b' + TextBits[i * 8:i * 8 + 8], 2) for i in range(sizeText // 8)]
-    return finalSequence
+        while '00000000' in TextBits[sizeText - 8:sizeText]:
+            TextBits = TextBits[:sizeText - 8]
+            sizeText -= 8
 
-print(encode(BASE64,bytes("ПРОДАМ ДУШУ ЗА ХОРОШУЮ ОЦЕНКУ","CP1251")))
+        finalSequence = [int('0b' + TextBits[i * 8:i * 8 + 8], 2) for i in range(sizeText // 8)]
+        return finalSequence

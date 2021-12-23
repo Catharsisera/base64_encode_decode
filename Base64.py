@@ -6,12 +6,13 @@ class Base64(object):
         pass
 
     def encode(alphabet, sequenceBytes):
-        def Symb(x, op=8):
-            t = ''
-            if len(x) % op != 0:
-                for i in range(op - len(x) % op):
-                    t = t + '0'
-            return t + x
+        
+        def Symb(sequence):
+            countNull = ''
+            if len(sequence) % 8 != 0:
+                for i in range(8 - len(sequence) % 8):
+                    countNull += '0'
+            return countNull + sequence
 
         bitsCount = 6 # Число бит на символ в алгоритме
         TextBits = "".join([Symb(bin(i)[2:]) for i in sequenceBytes])
